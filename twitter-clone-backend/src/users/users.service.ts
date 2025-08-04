@@ -5,12 +5,32 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService extends PrismaService {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
   async findByUsername(username: string) {
-    return this.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { username },
-      select: { email: true, username: true, id: true }
+      // The 'include' option tells Prisma to also fetch related data
+      include: {
+        tweets: {
+          orderBy: {
+            createdAt: 'desc', // Order tweets by creation date
+          },
+          include: { // Also include the author for the tweet list
+            author: {
+              select: {
+                id: true,
+                username: true,
+              }
+            }
+          }
+        }
+      }
     });
   }
+
 
   async findById(id: number) {
     return this.user.findUnique({

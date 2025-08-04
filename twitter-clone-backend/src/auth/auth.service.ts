@@ -16,8 +16,7 @@ export class AuthService {
       email: user.email
     }
 
-    const accessToken = this.jwtService.signAsync(payload)
-
+    const accessToken = await this.jwtService.signAsync(payload)
     return accessToken;
   }
 
@@ -35,6 +34,6 @@ export class AuthService {
       return new UnauthorizedException('User does not exists');
     }
 
-    return { user, accessToken: this.generateToken(user) };
+    return { user, accessToken: await this.generateToken(user) };
   }
 }

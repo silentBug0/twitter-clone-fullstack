@@ -4,7 +4,7 @@ import axiosInstance from "../api/axiosInstance";
 import { Link } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
@@ -17,16 +17,26 @@ const LoginPage: React.FC = () => {
       const response = await axiosInstance.post<{
         user: any;
         accessToken: string;
-      }>("/auth/login", { username, password });
+      }>("/auth/login", { email, password });
       const { user, accessToken } = response.data;
 
       login(accessToken, user);
     } catch (err: any) {
-      console.error("Login error:", err.response?.data || err.message);
-      setError(
-        err.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
+      console.error("Registration error:", err.response?.data || err.message);
+
+      // --- The corrected error handling logic ---
+      const backendError = err.response?.data;
+      let errorMessage = "Registration failed. Please try again.";
+
+      if (backendError?.message) {
+        if (Array.isArray(backendError.message)) {
+          // Join the array of messages into a single string
+          errorMessage = backendError.message.join(". ");
+        } else {
+          errorMessage = backendError.message;
+        }
+      }
+      setError(errorMessage);
     }
   };
 
@@ -38,17 +48,17 @@ const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block text-gray-700 text-sm font-bold mb-2"
             >
-              Username
+              Email
             </label>
             <input
-              type="text"
-              id="username"
+              type="email"
+              id="email"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>

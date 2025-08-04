@@ -1,7 +1,8 @@
 // src/index.tsx (or src/index.js)
+import "./index.css";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom"; // This is your PRIMARY Router
 import { AuthProvider } from "./context/AuthContext";

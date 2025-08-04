@@ -13,12 +13,17 @@ export class TweetsService extends PrismaService {
   }
 
   async findAllTweets() {
-    return this.tweet.findMany({ select: { id: true, authorId: true, content: true, } });
+    return this.tweet.findMany({
+      include: {
+        author: {
+          select: { username: true }
+        }
+      }
+    });
   }
 
   async findTweetsByUser(authorId: number) {
     return this.tweet.findMany({
-      select: { content: true, id: true },
       where: { authorId }
     });
 

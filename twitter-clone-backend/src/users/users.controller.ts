@@ -21,17 +21,9 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get('username/:username')
+  @Get(':username')
   async findByUsername(@Param('username') username: string) {
-    const user = await this.usersService.findByUsername(username);
-
-    if (user) {
-      const tweets = await this.tweetsService.findTweetsByUser(user.id);
-
-      return { user, tweets };
-    }
-
-    throw new UnauthorizedException('User does not exists');
+    return await this.usersService.findByUsername(username);
   }
 
   @Get('me')

@@ -5,6 +5,7 @@ import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
 import { useAuth } from "./context/AuthContext"; // Import useAuth to potentially redirect root
+import UserProfilePage from "./pages/UserProfilePage";
 
 const App: React.FC = () => {
   const { user } = useAuth(); // Get user from auth context
@@ -21,6 +22,15 @@ const App: React.FC = () => {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile/:username"
+        element={
+          <ProtectedRoute>
+            <UserProfilePage />
           </ProtectedRoute>
         }
       />
