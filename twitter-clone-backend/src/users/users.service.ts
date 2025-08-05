@@ -24,9 +24,13 @@ export class UsersService extends PrismaService {
                 id: true,
                 username: true,
               }
+            },
+            _count: {
+              select: { likes: true }, // Include the count of likes
             }
-          }
-        }
+          },
+        },
+       
       }
     });
   }

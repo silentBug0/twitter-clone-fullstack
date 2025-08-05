@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import TweetCard from "../components/TweetCard";
+import { useAuth } from "../context/AuthContext";
 
 // Define the shape of the User data we expect from the backend
 interface UserProfile {
@@ -20,6 +21,10 @@ interface Tweet {
     username: string;
   };
   createdAt: string;
+  _count: {
+    likes: number;
+  };
+  likes: any[]; // Adjust type if you have a specific Like type
 }
 
 const UserProfilePage: React.FC = () => {
@@ -27,6 +32,27 @@ const UserProfilePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
+
+  const handleDeleteTweet = async (tweetId: string) => {
+    if (!userProfile) return;
+
+    try {
+      await axiosInstance.delete(`tweets/${tweetId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUserProfile({
+        ...userProfile,
+        tweets: userProfile.tweets.filter((tweet) => tweet.id !== tweetId),
+      });
+    } catch (error) {
+      console.error("Failed to delete tweet:", error);
+      alert("Failed to delete tweet. Please try again.");
+    }
+  };
 
   useEffect(() => {
     if (!username) {
@@ -38,8 +64,10 @@ const UserProfilePage: React.FC = () => {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get<UserProfile>(`/users/${username}`);
-        
+        const response = await axiosInstance.get<UserProfile>(
+          `/users/${username}`
+        );
+
         setUserProfile(response.data);
       } catch (err: any) {
         console.error("Failed to fetch user profile:", err);
@@ -86,7 +114,11 @@ const UserProfilePage: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {userProfile.tweets.map((tweet) => (
-              <TweetCard key={tweet.id} tweet={tweet} />
+              <TweetCard
+                key={tweet.id}
+                tweet={tweet}
+                onDelete={handleDeleteTweet}
+              />
             ))}
           </div>
         )}

@@ -23,7 +23,10 @@ export class UsersController {
 
   @Get(':username')
   async findByUsername(@Param('username') username: string) {
-    return await this.usersService.findByUsername(username);
+    let a = await this.usersService.findByUsername(username);
+    console.log('findByUsername',a);
+    return a;
+    
   }
 
   @Get('me')

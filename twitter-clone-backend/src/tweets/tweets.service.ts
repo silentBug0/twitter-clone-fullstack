@@ -3,6 +3,23 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TweetsService extends PrismaService {
+
+  async getSingleTweet(tweetId: number, userId: number) {
+    return this.tweet.findUnique({
+      where: { id: tweetId },
+      include: {
+        _count: {
+          select: { likes: true }
+        },
+        likes: {
+          where: { userId },
+          select: { userId: true }
+        }
+      }
+    })
+
+  }
+
   async create(authorId: number, content: string,) {
     return this.tweet.create({
       data: {
@@ -16,7 +33,10 @@ export class TweetsService extends PrismaService {
     return this.tweet.findMany({
       include: {
         author: {
-          select: { username: true }
+          select: { username: true, id: true }
+        },
+        _count: {
+          select: { likes: true }, // Include the count of likes
         }
       }
     });
@@ -42,11 +62,57 @@ export class TweetsService extends PrismaService {
     if (!tweet) throw new UnauthorizedException('Tweet does not exists');
     if (tweet.authorId !== authorId) throw new UnauthorizedException('you dont have permission to delete others tweet');
 
-    return this.tweet.delete({
+    await this.tweet.delete({
       where: {
         id: tweetId
       }
     });
+
+    return { message: 'Tweet deleted successfully' };
+  }
+
+  async likeTweet(tweetId: number, userId: number) {
+    try {
+      return this.like.create({
+        data: {
+          tweet: { connect: { id: tweetId } },
+          user: { connect: { id: userId } },
+        }
+      });
+    } catch (error) {
+      // If the user has already liked the tweet, we can return the existing record
+      if (
+        typeof error === 'object' &&
+        error &&
+        'code' in error &&
+        (error as any).code === 'P2002' // Prisma's unique constraint violation code
+      ) { 
+        return this.like.findUnique({
+          where: { userId_tweetId: { userId, tweetId } },
+        });
+      }
+      throw error;
+    }
+  }
+
+  // Add a new method to unlike a tweet
+  async unlikeTweet(tweetId: number, userId: number) {
+    try {
+      return this.like.delete({
+        where: {
+          userId_tweetId: { userId, tweetId },
+        },
+      });
+    } catch (error) {
+      // If the like doesn't exist, we can just return a success message
+      if (typeof error === 'object' &&
+        error &&
+        'code' in error &&
+        (error as any).code === 'P2025') { // Prisma's record not found code
+        return { message: 'Like not found' };
+      }
+      throw error;
+    }
   }
 
 }

@@ -22,6 +22,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   tweets Tweet[]
+  likes Like[]
 }
 
 model Tweet {
@@ -32,4 +33,17 @@ model Tweet {
   updatedAt DateTime @updatedAt
 
   author    User     @relation(fields: [authorId], references: [id])
+  likes Like[]
+}
+
+// Add this new model
+model Like {
+  id        String   @id @default(uuid())
+  userId    Int
+  tweetId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, tweetId]) // A user can only like a tweet once
 }

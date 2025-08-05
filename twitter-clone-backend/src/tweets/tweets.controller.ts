@@ -36,4 +36,16 @@ export class TweetsController {
   async deleteTweet(@getUser() req: UserPayload, @Param('id', ParseIntPipe) id: number) {
     return this.tweetService.deleteTweet(req.userId, id);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/like')
+  async like(@getUser() req: UserPayload, @Param('id', ParseIntPipe) id: number) {
+    return this.tweetService.likeTweet(id, req.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id/like')
+  async unlike(@getUser() req: UserPayload, @Param('id', ParseIntPipe) id: number) {
+    return this.tweetService.unlikeTweet(id, req.userId);
+  }
 }
