@@ -1,6 +1,6 @@
-import { Controller, Get, UseGuards, Request, Param, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Param, UnauthorizedException, Post, Delete, Req, NotFoundException, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGaurd } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TweetsService } from '../tweets/tweets.service';
 import { getUser } from '../auth/get-user.decorator';
 
@@ -12,25 +12,31 @@ interface UserPayload {
 
 
 @Controller('users')
-@UseGuards(JwtAuthGaurd)
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService, private readonly tweetsService: TweetsService) { }
 
   @Get()
-  async findAll() {
-    return this.usersService.findAll();
+  @UseGuards(JwtAuthGuard)
+  async findAll(@getUser() req: UserPayload) {
+    return this.usersService.findAll(req.userId);
   }
 
   @Get(':username')
-  async findByUsername(@Param('username') username: string) {
-    let a = await this.usersService.findByUsername(username);
-    console.log('findByUsername',a);
-    return a;
-    
+  @UseGuards(JwtAuthGuard)
+  async findByUsername(@Param('username') username: string, @getUser() req: UserPayload) {
+    const currentUserId = req.userId;
+    const user = await this.usersService.findByUsername(username, currentUserId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   @Get('me')
-  async findMe(@getUser() req: UserPayload,) {
+  @UseGuards(JwtAuthGuard)
+  async findMe(@getUser() req: UserPayload) {
     const user = await this.usersService.findById(req.userId);
 
     if (user) {
@@ -38,5 +44,23 @@ export class UsersController {
     }
 
     throw new UnauthorizedException('User does not exists');
+  }
+
+  // Add this new route for following a user
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/follow')
+  async follow(@Param('id', ParseIntPipe) followeeId: number, @getUser() req: UserPayload) {
+    const followerId = req.userId;
+    console.log(followeeId, req.userId);
+
+    return this.usersService.follow(followerId, followeeId);
+  }
+
+  // Add this new route for unfollowing a user
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/follow')
+  async unfollow(@Param('id', ParseIntPipe) followeeId: number, @getUser() req: UserPayload) {
+    const followerId = req.userId;
+    return this.usersService.unfollow(followerId, followeeId);
   }
 }

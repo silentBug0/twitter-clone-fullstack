@@ -5,10 +5,10 @@ import { useAuth } from "../context/AuthContext"; // <-- Import useAuth
 import axiosInstance from "../api/axiosInstance";
 
 interface Tweet {
-  id: string;
+  id: number;
   content: string;
   author: {
-    id: string;
+    id: number;
     username: string;
   };
   createdAt: string;
@@ -16,13 +16,13 @@ interface Tweet {
     likes: number;
   };
   likes: {
-    userId: string;
+    userId: number;
   }[]; // Optional array of likes to check if the current user has liked it
 }
 
 interface TweetCardProps {
   tweet: Tweet;
-  onDelete: (tweetId: string) => void; // <-- Add a new prop for the delete function
+  onDelete: (tweetId: number) => void; // <-- Add a new prop for the delete function
 }
 
 const TweetCard: React.FC<TweetCardProps> = ({ tweet, onDelete }) => {

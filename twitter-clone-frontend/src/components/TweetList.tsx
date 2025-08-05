@@ -5,10 +5,10 @@ import { useAuth } from "../context/AuthContext";
 
 // Define the shape of the Tweet data we expect from the backend
 interface Tweet {
-  id: string;
+  id: number;
   content: string;
   author: {
-    id: string;
+    id: number;
     username: string;
   };
   createdAt: string;
@@ -27,7 +27,7 @@ const TweetList: React.FC = () => {
   const fetchTweets = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/tweets");
+      const response = await axiosInstance.get("/tweets/timeline");
       // Assuming your backend returns a list of tweets
       setTweets(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
@@ -38,7 +38,7 @@ const TweetList: React.FC = () => {
     }
   };
 
-  const handleDeleteTweet = async (tweetId: string) => {
+  const handleDeleteTweet = async (tweetId: number) => {
     try {
       await axiosInstance.delete(`tweets/${tweetId}`, {
         headers: {
@@ -48,8 +48,8 @@ const TweetList: React.FC = () => {
 
       setTweets(tweets.filter((tweet) => tweet.id !== tweetId));
     } catch (error) {
-       console.error("Failed to delete tweet:", error);
-       alert("Failed to delete tweet. Please try again.");
+      console.error("Failed to delete tweet:", error);
+      alert("Failed to delete tweet. Please try again.");
     }
   };
   useEffect(() => {

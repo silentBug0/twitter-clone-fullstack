@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 // Define the shape of a user object (adjust based on your backend user structure)
 interface User {
-  id: string;
+  id: number;
   username: string;
   email: string;
   // Add other user properties like displayName, bio if available

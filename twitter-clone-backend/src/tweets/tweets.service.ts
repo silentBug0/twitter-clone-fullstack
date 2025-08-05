@@ -115,4 +115,37 @@ export class TweetsService extends PrismaService {
     }
   }
 
+  async findTimeline(currentUserId: number) {
+    // Find all the users that the current user is following
+    const following = await this.following.findMany({
+      where: { followerId: currentUserId },
+      select: { followeeId: true },
+    });
+
+    const followedUserIds = following.map(f => f.followeeId);
+
+    // Also include the current user's ID so they see their own tweets
+    followedUserIds.push(currentUserId);
+
+    // Now, find all tweets from these users
+    return this.tweet.findMany({
+      where: {
+        authorId: {
+          in: followedUserIds,
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+          }
+        },
+        _count: {
+          select: { likes: true },
+        }
+      }
+    });
+  }
 }

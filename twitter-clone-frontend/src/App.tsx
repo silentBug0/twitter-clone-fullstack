@@ -1,11 +1,13 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
 import { useAuth } from "./context/AuthContext"; // Import useAuth to potentially redirect root
 import UserProfilePage from "./pages/UserProfilePage";
+import ExplorePage from "./pages/ExplorePage";
 
 const App: React.FC = () => {
   const { user } = useAuth(); // Get user from auth context
@@ -31,6 +33,15 @@ const App: React.FC = () => {
         element={
           <ProtectedRoute>
             <UserProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/explore" // <-- The new explore route
+        element={
+          <ProtectedRoute>
+            <ExplorePage />
           </ProtectedRoute>
         }
       />

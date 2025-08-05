@@ -14,38 +14,45 @@ interface UserPayload {
 
 @Controller('tweets')
 export class TweetsController {
-  constructor(private readonly tweetService: TweetsService) { }
+  constructor(private readonly tweetsService: TweetsService) { }
   @Post()
   @UseGuards(AuthGuard('jwt'))
   async createTweet(@getUser() req: UserPayload, @Body() { content }: CreateTweetDto) {
-    return this.tweetService.create(req.userId, content)
+    return this.tweetsService.create(req.userId, content)
   }
 
   @Get()
   async findAll() {
-    return this.tweetService.findAllTweets();
+    return this.tweetsService.findAllTweets();
   }
 
   @Get('user/:id')
   async findTweetsByUser(@Param('id', ParseIntPipe) id: number) {
-    return this.tweetService.findTweetsByUser(id);
+    return this.tweetsService.findTweetsByUser(id);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   async deleteTweet(@getUser() req: UserPayload, @Param('id', ParseIntPipe) id: number) {
-    return this.tweetService.deleteTweet(req.userId, id);
+    return this.tweetsService.deleteTweet(req.userId, id);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(':id/like')
   async like(@getUser() req: UserPayload, @Param('id', ParseIntPipe) id: number) {
-    return this.tweetService.likeTweet(id, req.userId);
+    return this.tweetsService.likeTweet(id, req.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id/like')
   async unlike(@getUser() req: UserPayload, @Param('id', ParseIntPipe) id: number) {
-    return this.tweetService.unlikeTweet(id, req.userId);
+    return this.tweetsService.unlikeTweet(id, req.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('timeline')
+  async findTimeline(@getUser() req: UserPayload) {
+    const currentUserId = req.userId;
+    return this.tweetsService.findTimeline(currentUserId);
   }
 }

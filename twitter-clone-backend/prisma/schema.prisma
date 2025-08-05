@@ -21,8 +21,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tweets Tweet[]
-  likes Like[]
+  tweets    Tweet[]
+  likes     Like[]
+  following Following[] @relation("Follower")
+  followers Following[] @relation("Followee")
 }
 
 model Tweet {
@@ -32,13 +34,13 @@ model Tweet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author    User     @relation(fields: [authorId], references: [id])
-  likes Like[]
+  author User   @relation(fields: [authorId], references: [id])
+  likes  Like[]
 }
 
 // Add this new model
 model Like {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   userId    Int
   tweetId   Int
   user      User     @relation(fields: [userId], references: [id])
@@ -46,4 +48,15 @@ model Like {
   createdAt DateTime @default(now())
 
   @@unique([userId, tweetId]) // A user can only like a tweet once
+}
+
+model Following {
+  id        Int      @id @default(autoincrement())
+  followerId Int
+  followeeId Int
+  follower   User     @relation("Follower", fields: [followerId], references: [id])
+  followee   User     @relation("Followee", fields: [followeeId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([followerId, followeeId]) // A user can only follow another user once
 }
